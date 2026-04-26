@@ -3,7 +3,7 @@
 Real-time credit card fraud detection system using XGBoost. Catches 77% of fraudulent transactions with 40% precision.
 
 # Demo
-Fraud Detection API: https://github.com/yourusername/fraud-detection-api
+Fraud Detection API: https://github.com/bquan1406-droid/fraud-detection-api
 Live Demo: https://fraud-detection-api-231m.onrender.com
 
 ## Business Impact
