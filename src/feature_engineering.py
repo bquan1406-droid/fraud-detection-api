@@ -1,75 +1,74 @@
 import pandas as pd
 import numpy as np
+import joblib
 
-def engineer_features(tx: dict, card1_freq_dict: dict, card4_freq_dict: dict, product_freq_dict: dict, addr1_freq_dict: dict, addr2_freq_dict: dict, card2_freq_dict: dict, card3_freq_dict: dict, pemail_freq_dict: dict, remail_freq_dict: dict, card1_card2_freq_dict: dict, card1_amt_mean_dict: dict, card1_amt_std_dict: dict, card1_tx_count_dict: dict, card2_amt_mean_dict: dict, addr1_amt_mean_dict: dict, addr1_tx_count_dict: dict) -> pd.DataFrame:
+def load_frequency_dicts():
+    base_path = 'models/frequency_dicts/'
+    dicts = {
+        'card1_freq': joblib.load(base_path + 'card1_freq_dict.pkl'),
+        'card4_freq': joblib.load(base_path + 'card4_freq_dict.pkl'),
+        'product_freq': joblib.load(base_path + 'product_freq_dict.pkl'),
+        'addr1_freq': joblib.load(base_path + 'addr1_freq_dict.pkl'),
+        'addr2_freq': joblib.load(base_path + 'addr2_freq_dict.pkl'),
+        'card2_freq': joblib.load(base_path + 'card2_freq_dict.pkl'),
+        'card3_freq': joblib.load(base_path + 'card3_freq_dict.pkl'),
+        'pemail_freq': joblib.load(base_path + 'pemail_freq_dict.pkl'),
+        'remail_freq': joblib.load(base_path + 'remail_freq_dict.pkl'),
+        'card1_card2_freq': joblib.load(base_path + 'card1_card2_freq_dict.pkl'),
+        'card1_amt_mean': joblib.load(base_path + 'card1_amt_mean_dict.pkl'),
+        'card1_amt_std': joblib.load(base_path + 'card1_amt_std_dict.pkl'),
+        'card1_tx_count': joblib.load(base_path + 'card1_tx_count_dict.pkl'),
+        'card2_amt_mean': joblib.load(base_path + 'card2_amt_mean_dict.pkl'),
+        'addr1_amt_mean': joblib.load(base_path + 'addr1_amt_mean_dict.pkl'),
+        'addr1_tx_count': joblib.load(base_path + 'addr1_tx_count_dict.pkl')
+    }
+    return dicts
+
+def engineer_features(tx, dicts):
+    features = {}
     
-    df = pd.DataFrame([tx])
+    features['card1_freq'] = dicts['card1_freq'].get(tx.card1, 0)
+    features['card4_freq'] = dicts['card4_freq'].get(tx.card4, 0)
+    features['product_freq'] = dicts['product_freq'].get(tx.ProductCD, 0)
+    features['addr1_freq'] = dicts['addr1_freq'].get(tx.addr1, 0)
+    features['addr2_freq'] = dicts['addr2_freq'].get(tx.addr2, 0)
+    features['card2_freq'] = dicts['card2_freq'].get(tx.card2 if tx.card2 else -1, 0)
+    features['card3_freq'] = dicts['card3_freq'].get(tx.card3 if tx.card3 else -1, 0)
     
-    card1_freq = card1_freq_dict.get(df['card1'].iloc[0], 0)
-    card4_freq = card4_freq_dict.get(df['card4'].iloc[0], 0)
-    product_freq = product_freq_dict.get(df['ProductCD'].iloc[0], 0)
-    addr1_freq = addr1_freq_dict.get(df['addr1'].iloc[0], 0)
-    addr2_freq = addr2_freq_dict.get(df['addr2'].iloc[0], 0)
-    card2_freq = card2_freq_dict.get(df['card2'].iloc[0], 0)
-    card3_freq = card3_freq_dict.get(df['card3'].iloc[0], 0)
-    pemail_freq = pemail_freq_dict.get(df['P_emaildomain'].iloc[0], 0)
-    remail_freq = remail_freq_dict.get(df['R_emaildomain'].iloc[0], 0)
-    card1_card2_key = str(df['card1'].iloc[0]) + '_' + str(df['card2'].iloc[0])
-    card1_card2_freq = card1_card2_freq_dict.get(card1_card2_key, 0)
+    pemail = tx.P_emaildomain if tx.P_emaildomain else 'missing'
+    remail = tx.R_emaildomain if tx.R_emaildomain else 'missing'
+    features['pemail_freq'] = dicts['pemail_freq'].get(pemail, 0)
+    features['remail_freq'] = dicts['remail_freq'].get(remail, 0)
     
-    amt_dollars = int(df['TransactionAmt'].iloc[0])
-    amt_cents = int((df['TransactionAmt'].iloc[0] - amt_dollars) * 100)
+    card1_card2_key = str(tx.card1) + '_' + str(tx.card2 if tx.card2 else -1)
+    features['card1_card2_freq'] = dicts['card1_card2_freq'].get(card1_card2_key, 0)
     
-    card1_amt_mean = card1_amt_mean_dict.get(df['card1'].iloc[0], 0)
-    card1_amt_std = card1_amt_std_dict.get(df['card1'].iloc[0], 0)
-    card1_tx_count = card1_tx_count_dict.get(df['card1'].iloc[0], 0)
+    features['amt_dollars'] = int(tx.TransactionAmt)
+    features['amt_cents'] = int((tx.TransactionAmt - int(tx.TransactionAmt)) * 100)
     
-    card2_amt_mean = card2_amt_mean_dict.get(df['card2'].iloc[0], 0)
-    addr1_amt_mean = addr1_amt_mean_dict.get(df['addr1'].iloc[0], 0)
-    addr1_tx_count = addr1_tx_count_dict.get(df['addr1'].iloc[0], 0)
+    features['card1_amt_mean'] = dicts['card1_amt_mean'].get(tx.card1, 0)
+    features['card1_amt_std'] = dicts['card1_amt_std'].get(tx.card1, 0)
+    features['card1_tx_count'] = dicts['card1_tx_count'].get(tx.card1, 0)
+    features['card2_amt_mean'] = dicts['card2_amt_mean'].get(tx.card2 if tx.card2 else -1, 0)
+    features['addr1_amt_mean'] = dicts['addr1_amt_mean'].get(tx.addr1, 0)
+    features['addr1_tx_count'] = dicts['addr1_tx_count'].get(tx.addr1, 0)
     
     d_columns = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13','D14','D15']
     d_count = 0
     for col in d_columns:
-        if col in df and pd.notna(df[col].iloc[0]):
+        value = getattr(tx, col, None)
+        if value is not None and not pd.isna(value):
             d_count += 1
+    features['d_count'] = d_count
     
-    p_email_missing = 1 if pd.isna(df['P_emaildomain'].iloc[0]) else 0
-    r_email_missing = 1 if pd.isna(df['R_emaildomain'].iloc[0]) else 0
-    same_email_domain = 1 if df['P_emaildomain'].iloc[0] == df['R_emaildomain'].iloc[0] else 0
+    features['P_email_missing'] = 1 if tx.P_emaildomain is None else 0
+    features['R_email_missing'] = 1 if tx.R_emaildomain is None else 0
+    features['same_email_domain'] = 1 if tx.P_emaildomain == tx.R_emaildomain else 0
     
-    card1_last_tx_diff = 0
+    features['card1_last_tx_diff'] = 0
     
-    features = {
-        'card1_freq': card1_freq,
-        'card4_freq': card4_freq,
-        'product_freq': product_freq,
-        'amt_dollars': amt_dollars,
-        'amt_cents': amt_cents,
-        'card1_amt_mean': card1_amt_mean,
-        'card1_amt_std': card1_amt_std,
-        'card1_tx_count': card1_tx_count,
-        'd_count': d_count,
-        'addr1_freq': addr1_freq,
-        'addr2_freq': addr2_freq,
-        'card2_freq': card2_freq,
-        'card3_freq': card3_freq,
-        'card1_card2_freq': card1_card2_freq,
-        'P_email_missing': p_email_missing,
-        'R_email_missing': r_email_missing,
-        'same_email_domain': same_email_domain,
-        'pemail_freq': pemail_freq,
-        'remail_freq': remail_freq,
-        'card2_amt_mean': card2_amt_mean,
-        'addr1_amt_mean': addr1_amt_mean,
-        'card1_last_tx_diff': card1_last_tx_diff,
-        'addr1_tx_count': addr1_tx_count
-    }
+    for i in range(1, 340):
+        v_col = f'V{i}'
+        features[v_col] = getattr(tx, v_col, None)
     
-    for v_col in [f'V{i}' for i in range(1, 340)]:
-        features[v_col] = df.get(v_col, np.nan).iloc[0] if v_col in df else np.nan
-    
-    features['ProductCD_encoded'] = None
-    features['card4_encoded'] = None
-    
-    return pd.DataFrame([features])
+    return features
