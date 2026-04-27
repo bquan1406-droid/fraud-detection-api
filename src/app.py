@@ -1,3 +1,12 @@
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://fraud-detection-api.streamlit.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 from fastapi import FastAPI, HTTPException
 from src.schemas import Transaction
 from src.feature_engineering import load_frequency_dicts, engineer_features
