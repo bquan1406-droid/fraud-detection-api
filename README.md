@@ -1,16 +1,19 @@
 # Fraud Detection API
 
-Real-time credit card fraud detection system using XGBoost. Catches 77% of fraudulent transactions with 40% precision.
+Real-time credit card fraud detection system using XGBoost. Catches 72% of fraudulent transactions with 50.5% precision.
 
 # Demo
+
 Fraud Detection API: https://fraud-detection-api-231m.onrender.com
-Live Demo: https://fraud-detection-api.streamlit.app/
+
+Live Demo: https://fraud-detection-api.streamlit.app
 
 ## Business Impact
 
-- **77.2% recall** - Catches 3,190 out of 4,133 fraud attempts in validation
-- **39.9% precision** - 4,805 false alarms per 118,108 transactions
-- **F1 Score: 0.526** - Balanced for production use
+- **72.0% recall** - Catches 2,976 out of 4,133 fraud attempts in validation
+- **50.5% precision** - 2,918 false alarms per 118,108 transactions
+- **F1 Score: 0.594** - Balanced for production use
+- **Threshold: 0.5929** - Optimized for precision-recall trade-off
 
 For a typical bank where missed fraud costs 7x more than false positives, this trade-off is acceptable and deployable.
 
@@ -18,10 +21,11 @@ For a typical bank where missed fraud costs 7x more than false positives, this t
 
 | Metric | Value |
 |--------|-------|
-| Recall | 77.2% |
-| Precision | 39.9% |
-| F1 Score | 0.526 |
+| Recall | 72.0% |
+| Precision | 50.5% |
+| F1 Score | 0.594 |
 | AUC | 0.883 |
+| Threshold | 0.5929 |
 
 ## Features
 
@@ -45,40 +49,53 @@ For a typical bank where missed fraud costs 7x more than false positives, this t
 
 ## Repository Structure
 
-fraud-detection-api/models/ - Trained model files (fraud_detection_xgboost.pkl, product_encoder.pkl, card4_encoder.pkl, feature_columns.pkl)
+fraud-detection-api/models/ - Trained model files (fraud_detection_final.pkl, product_encoder.pkl, card4_encoder.pkl, feature_columns.pkl, threshold.json)
+
 fraud-detection-api/src/ - FastAPI application
+
 fraud-detection-api/dashboard/ - Streamlit dashboard
+
 fraud-detection-api/tests/ - Unit tests
+
 fraud-detection-api/requirements.txt - Python dependencies
+
 fraud-detection-api/README.md - Documentation
 
 ## Quick Start
 
 Clone the repository:
+
 git clone https://github.com/YOUR_USERNAME/fraud-detection-api.git
+
 cd fraud-detection-api
 
 Install dependencies:
+
 pip install -r requirements.txt
 
 Run the API:
+
 uvicorn src.app:app --reload
 
 Test the API:
-curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{"TransactionID": 12345, "ProductCD": "W", "card1": 13926, "card4": "visa", "TransactionAmt": 68.50, "addr1": 315, "addr2": 87, "TransactionDT": 86400}'
+
+curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{"TransactionID": 999002, "ProductCD": "C", "card1": 2755, "card4": "discover", "TransactionAmt": 8900.00, "addr1": 476, "addr2": 87, "TransactionDT": 86400}'
 
 Expected response:
-{"TransactionID": 12345, "fraud_prediction": 0, "fraud_probability": 0.23, "threshold": 0.5, "alert_sent": false}
+
+{"TransactionID": 999002, "fraud_prediction": 0, "fraud_probability": 0.3192, "threshold": 0.5929, "alert_sent": false}
 
 ## Training Process
 
 The model was trained on the IEEE-CIS Fraud Detection dataset with 590,540 transactions, 3.5% fraud rate, and 394 raw columns.
 
 Training steps:
+
 1. Exploratory analysis of raw features
 2. Feature engineering (23 derived features)
 3. Hyperparameter tuning (max_depth grid search from 3 to 13)
 4. XGBoost with scale_pos_weight=28 for class imbalance
+5. Threshold optimization to 0.5929 achieving 72% recall and 50.5% precision
 
 Training notebook available on Kaggle.
 
