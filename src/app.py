@@ -11,7 +11,7 @@ app = FastAPI(title="Fraud Detection API", description="Real-time credit card fr
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://fraud-detection-api.streamlit.app"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,6 +31,10 @@ frequency_dicts = load_frequency_dicts()
 @app.get("/")
 def read_root():
     return {"message": "Fraud Detection API is running", "status": "active"}
+
+@app.get("/test")
+def test_get():
+    return {"message": "GET request successful. The API is reachable."}
 
 @app.post("/predict")
 def predict(transaction: Transaction):
