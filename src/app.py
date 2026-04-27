@@ -4,13 +4,19 @@ from src.feature_engineering import load_frequency_dicts, engineer_features
 import joblib
 import pandas as pd
 import numpy as np
+import json
 
 app = FastAPI(title="Fraud Detection API", description="Real-time credit card fraud detection", version="1.0")
 
-model = joblib.load('models/fraud_detection_xgboost.pkl')
+model = joblib.load('models/fraud_detection_final.pkl')
 le_product = joblib.load('models/product_encoder.pkl')
 le_card4 = joblib.load('models/card4_encoder.pkl')
 feature_columns = joblib.load('models/feature_columns.pkl')
+
+with open('models/threshold.json', 'r') as f:
+    threshold_config = json.load(f)
+THRESHOLD = threshold_config['threshold']
+
 frequency_dicts = load_frequency_dicts()
 
 @app.get("/")
@@ -33,13 +39,13 @@ def predict(transaction: Transaction):
         features_df = features_df[feature_columns]
         
         proba = model.predict_proba(features_df)[0, 1]
-        prediction = 1 if proba > 0.5 else 0
+        prediction = 1 if proba > THRESHOLD else 0
         
         return {
             "TransactionID": transaction.TransactionID,
             "fraud_prediction": prediction,
             "fraud_probability": round(proba, 4),
-            "threshold": 0.5,
+            "threshold": THRESHOLD,
             "alert_sent": prediction == 1
         }
     except Exception as e:
