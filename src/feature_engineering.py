@@ -69,6 +69,13 @@ def engineer_features(tx, dicts):
     
     for i in range(1, 340):
         v_col = f'V{i}'
-        features[v_col] = getattr(tx, v_col, None)
+        val = getattr(tx, v_col, None)
+        if val is None or pd.isna(val):
+            features[v_col] = 0.0
+        else:
+            try:
+                features[v_col] = float(val)
+            except (ValueError, TypeError):
+                features[v_col] = 0.0
     
     return features
