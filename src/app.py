@@ -41,8 +41,8 @@ def predict(transaction: Transaction):
     try:
         features_dict = engineer_features(transaction, frequency_dicts)
         
-        features_dict['ProductCD_encoded'] = le_product.transform([transaction.ProductCD])[0]
-        features_dict['card4_encoded'] = le_card4.transform([transaction.card4])[0]
+        features_dict['ProductCD_encoded'] = int(le_product.transform([transaction.ProductCD])[0])
+        features_dict['card4_encoded'] = int(le_card4.transform([transaction.card4])[0])
         
         features_df = pd.DataFrame([features_dict])
         
@@ -55,11 +55,11 @@ def predict(transaction: Transaction):
         prediction = 1 if proba > THRESHOLD else 0
         
         return {
-            "TransactionID": transaction.TransactionID,
-            "fraud_prediction": prediction,
-            "fraud_probability": round(proba, 4),
-            "threshold": THRESHOLD,
-            "alert_sent": prediction == 1
+            "TransactionID": int(transaction.TransactionID),
+            "fraud_prediction": int(prediction),
+            "fraud_probability": float(round(proba, 4)),
+            "threshold": float(THRESHOLD),
+            "alert_sent": bool(prediction == 1)
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
