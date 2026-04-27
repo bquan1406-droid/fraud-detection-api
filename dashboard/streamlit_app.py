@@ -24,7 +24,7 @@ st.sidebar.markdown("""
 """)
 
 st.sidebar.header("Threshold")
-threshold = st.sidebar.slider("Fraud Threshold", 0.0, 1.0, 0.5, 0.05)
+threshold = st.sidebar.slider("Fraud Threshold", 0.0, 1.0, 0.5929, 0.05)
 st.sidebar.caption("Lower threshold = more fraud caught, more false alarms")
 
 col1, col2 = st.columns([1, 1])
