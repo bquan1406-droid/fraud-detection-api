@@ -7,3 +7,5 @@ xgboost
 joblib
 python-dotenv
 requests
+plotly
+streamlit
