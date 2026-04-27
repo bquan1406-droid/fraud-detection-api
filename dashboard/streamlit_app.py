@@ -303,7 +303,7 @@ with tab3:
     
     st.markdown("---")
     st.markdown("### GitHub Repository")
-    st.markdown("https://github.com/yourusername/fraud-detection-api")
+    st.markdown("https://github.com/bquan1406-droid/fraud-detection-api")
     
     st.markdown("### Author")
     st.markdown("Tran Bao Quan - Data Science Graduate (2026)")
